@@ -41,25 +41,25 @@ def macem_season (day_df):
     season_df = day_df.groupby(by="season").count_cr.sum().reset_index() 
     return season_df
 
-days_df = pd.read_csv("day_df.csv")
-hours_df = pd.read_csv("hour_df.csv")
+day_df = pd.read_csv("day_df.csv")
+hour_df = pd.read_csv("hour_df.csv")
 
 datetime_columns = ["dteday"]
-days_df.sort_values(by="dteday", inplace=True)
-days_df.reset_index(inplace=True)   
+day_df.sort_values(by="dteday", inplace=True)
+day_df.reset_index(inplace=True)   
 
-hours_df.sort_values(by="dteday", inplace=True)
-hours_df.reset_index(inplace=True)
+hour_df.sort_values(by="dteday", inplace=True)
+hour_df.reset_index(inplace=True)
 
 for column in datetime_columns:
-    days_df[column] = pd.to_datetime(days_df[column])
-    hours_df[column] = pd.to_datetime(hours_df[column])
+    day_df[column] = pd.to_datetime(day_df[column])
+    hour_df[column] = pd.to_datetime(hour_df[column])
 
-min_date_days = days_df["dteday"].min()
-max_date_days = days_df["dteday"].max()
+min_date_days = day_df["dteday"].min()
+max_date_days = day_df["dteday"].max()
 
-min_date_hour = hours_df["dteday"].min()
-max_date_hour = hours_df["dteday"].max()
+min_date_hour = hour_df["dteday"].min()
+max_date_hour = hour_df["dteday"].max()
 
 with st.sidebar:
     # Menambahkan logo perusahaan
@@ -72,11 +72,11 @@ with st.sidebar:
         max_value=max_date_days,
         value=[min_date_days, max_date_days])
   
-main_df_days = days_df[(days_df["dteday"] >= str(start_date)) & 
-                       (days_df["dteday"] <= str(end_date))]
+main_df_days = day_df[(day_df["dteday"] >= str(start_date)) & 
+                       (day_df["dteday"] <= str(end_date))]
 
-main_df_hour = hours_df[(hours_df["dteday"] >= str(start_date)) & 
-                        (hours_df["dteday"] <= str(end_date))]
+main_df_hour = hour_df[(hour_df["dteday"] >= str(start_date)) & 
+                        (hour_df["dteday"] <= str(end_date))]
 
 hour_count_df = get_total_count_by_hour_df(main_df_hour)
 day_df_count_2011 = count_by_day_df(main_df_days)
@@ -107,8 +107,8 @@ st.subheader("Performa penjualan perusahaan dalam beberapa tahun terakhir")
 
 fig, ax = plt.subplots(figsize=(16, 8))
 ax.plot(
-    days_df["dteday"],
-    days_df["count_cr"],
+    day_df["dteday"],
+    day_df["count_cr"],
     marker='o', 
     linewidth=2,
     color="#90CAF9"
