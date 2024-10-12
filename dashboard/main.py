@@ -41,133 +41,138 @@ def macem_season(day_df):
     season_df = day_df.groupby(by="season").count_cr.sum().reset_index()
     return season_df
 
-# Pastikan jalur file CSV sudah benar
-days_df = pd.read_csv("day_df.csv")
-hours_df = pd.read_csv("hour_df.csv")
+# Menggunakan Streamlit file_uploader untuk mengunggah file CSV
+uploaded_day_file = st.file_uploader("Upload day_df.csv", type=["csv"])
+uploaded_hour_file = st.file_uploader("Upload hour_df.csv", type=["csv"])
 
-datetime_columns = ["dteday"]
-days_df.sort_values(by="dteday", inplace=True)
-days_df.reset_index(inplace=True)
+if uploaded_day_file is not None and uploaded_hour_file is not None:
+    # Membaca file CSV yang diunggah
+    days_df = pd.read_csv(uploaded_day_file)
+    hours_df = pd.read_csv(uploaded_hour_file)
 
-hours_df.sort_values(by="dteday", inplace=True)
-hours_df.reset_index(inplace=True)
+    datetime_columns = ["dteday"]
+    days_df.sort_values(by="dteday", inplace=True)
+    days_df.reset_index(inplace=True)
 
-for column in datetime_columns:
-    days_df[column] = pd.to_datetime(days_df[column])
-    hours_df[column] = pd.to_datetime(hours_df[column])
+    hours_df.sort_values(by="dteday", inplace=True)
+    hours_df.reset_index(inplace=True)
 
-min_date_days = days_df["dteday"].min()
-max_date_days = days_df["dteday"].max()
+    for column in datetime_columns:
+        days_df[column] = pd.to_datetime(days_df[column])
+        hours_df[column] = pd.to_datetime(hours_df[column])
 
-min_date_hour = hours_df["dteday"].min()
-max_date_hour = hours_df["dteday"].max()
+    min_date_days = days_df["dteday"].min()
+    max_date_days = days_df["dteday"].max()
 
-with st.sidebar:
-    # Menambahkan logo perusahaan
-    st.image("https://www.comunesanchiricoraparo.it/images/Avvisi/Bike-sharing/Risorsa_3.png")
+    min_date_hour = hours_df["dteday"].min()
+    max_date_hour = hours_df["dteday"].max()
 
-    # Mengambil start_date & end_date dari date_input
-    start_date, end_date = st.date_input(
-        label='Rentang Waktu',
-        min_value=min_date_days,
-        max_value=max_date_days,
-        value=[min_date_days, max_date_days]
+    with st.sidebar:
+        # Menambahkan logo perusahaan
+        st.image("https://www.comunesanchiricoraparo.it/images/Avvisi/Bike-sharing/Risorsa_3.png")
+
+        # Mengambil start_date & end_date dari date_input
+        start_date, end_date = st.date_input(
+            label='Rentang Waktu',
+            min_value=min_date_days,
+            max_value=max_date_days,
+            value=[min_date_days, max_date_days]
+        )
+
+    main_df_days = days_df[(days_df["dteday"] >= str(start_date)) &
+                           (days_df["dteday"] <= str(end_date))]
+
+    main_df_hour = hours_df[(hours_df["dteday"] >= str(start_date)) &
+                            (hours_df["dteday"] <= str(end_date))]
+
+    hour_count_df = get_total_count_by_hour_df(main_df_hour)
+    day_df_count_2011 = count_by_day_df(main_df_days)
+    reg_df = total_registered_df(main_df_days)
+    cas_df = total_casual_df(main_df_days)
+    sum_order_items_df = sum_order(main_df_hour)
+    season_df = macem_season(main_df_hour)
+
+    # Melengkapi Dashboard dengan Berbagai Visualisasi Data
+    st.header('Bike Sharing 🚲')
+
+    st.subheader('Daily Sharing')
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        total_orders = day_df_count_2011['count_cr'].sum()
+        st.metric("Total Sharing Bike", value=total_orders)
+
+    with col2:
+        total_sum = reg_df['register_sum'].sum()
+        st.metric("Total Registered", value=total_sum)
+
+    with col3:
+        total_sum = cas_df['casual_sum'].sum()
+        st.metric("Total Casual", value=total_sum)
+
+    st.subheader("Performa penjualan perusahaan dalam beberapa tahun terakhir")
+
+    fig, ax = plt.subplots(figsize=(16, 8))  # Ukuran lebih kecil dari sebelumnya
+    ax.plot(
+        days_df["dteday"],
+        days_df["count_cr"],
+        marker='o',
+        linewidth=2,
+        color="#90CAF9"
     )
+    ax.tick_params(axis='y', labelsize=20)
+    ax.tick_params(axis='x', labelsize=15)
+    st.pyplot(fig)
 
-main_df_days = days_df[(days_df["dteday"] >= str(start_date)) &
-                       (days_df["dteday"] <= str(end_date))]
+    st.subheader("Pada jam berapa yang paling banyak dan paling sedikit disewa?")
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(20, 10))  # Ukuran lebih kecil dari sebelumnya
 
-main_df_hour = hours_df[(hours_df["dteday"] >= str(start_date)) &
-                        (hours_df["dteday"] <= str(end_date))]
+    sns.barplot(x="hours", y="count_cr", data=sum_order_items_df.head(5), palette=["#D3D3D3", "#D3D3D3", "#90CAF9", "#D3D3D3", "#D3D3D3"], ax=ax[0])
+    ax[0].set_ylabel(None)
+    ax[0].set_xlabel("Hours (PM)", fontsize=30)
+    ax[0].set_title("Jam dengan banyak penyewa sepeda", loc="center", fontsize=30)
+    ax[0].tick_params(axis='y', labelsize=35)
+    ax[0].tick_params(axis='x', labelsize=30)
 
-hour_count_df = get_total_count_by_hour_df(main_df_hour)
-day_df_count_2011 = count_by_day_df(main_df_days)
-reg_df = total_registered_df(main_df_days)
-cas_df = total_casual_df(main_df_days)
-sum_order_items_df = sum_order(main_df_hour)
-season_df = macem_season(main_df_hour)
+    sns.barplot(x="hours", y="count_cr", data=sum_order_items_df.sort_values(by="hours", ascending=True).head(5), palette=["#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#90CAF9"], ax=ax[1])
+    ax[1].set_ylabel(None)
+    ax[1].set_xlabel("Hours (AM)", fontsize=30)
+    ax[1].set_title("Jam dengan sedikit penyewa sepeda", loc="center", fontsize=30)
+    ax[1].invert_xaxis()
+    ax[1].yaxis.set_label_position("right")
+    ax[1].yaxis.tick_right()
+    ax[1].tick_params(axis='y', labelsize=35)
+    ax[1].tick_params(axis='x', labelsize=30)
 
-# Melengkapi Dashboard dengan Berbagai Visualisasi Data
-st.header('Bike Sharing 🚲')
+    st.pyplot(fig)
 
-st.subheader('Daily Sharing')
-col1, col2, col3 = st.columns(3)
+    st.subheader("Musim apa yang paling banyak disewa?")
 
-with col1:
-    total_orders = day_df_count_2011['count_cr'].sum()
-    st.metric("Total Sharing Bike", value=total_orders)
+    colors = ["#D3D3D3", "#D3D3D3", "#D3D3D3", "#90CAF9"]
+    fig, ax = plt.subplots(figsize=(20, 10))
+    sns.barplot(
+        y="count_cr",
+        x="season",
+        data=season_df.sort_values(by="season", ascending=False),
+        palette=colors,
+        ax=ax
+    )
+    ax.set_title("Grafik Antar Musim", loc="center", fontsize=50)
+    ax.set_ylabel(None)
+    ax.set_xlabel(None)
+    ax.tick_params(axis='x', labelsize=35)
+    ax.tick_params(axis='y', labelsize=30)
+    st.pyplot(fig)
 
-with col2:
-    total_sum = reg_df['register_sum'].sum()
-    st.metric("Total Registered", value=total_sum)
+    st.subheader("Perbandingan Customer yang Registered dengan Casual")
 
-with col3:
-    total_sum = cas_df['casual_sum'].sum()
-    st.metric("Total Casual", value=total_sum)
+    labels = 'casual', 'registered'
+    sizes = [18.8, 81.2]
+    explode = (0, 0.1)
 
-st.subheader("Performa penjualan perusahaan dalam beberapa tahun terakhir")
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%', colors=["#D3D3D3", "#90CAF9"],
+            shadow=True, startangle=90)
+    ax1.axis('equal')
 
-fig, ax = plt.subplots(figsize=(16, 8))  # Ukuran lebih kecil dari sebelumnya
-ax.plot(
-    days_df["dteday"],
-    days_df["count_cr"],
-    marker='o',
-    linewidth=2,
-    color="#90CAF9"
-)
-ax.tick_params(axis='y', labelsize=20)
-ax.tick_params(axis='x', labelsize=15)
-st.pyplot(fig)
-
-st.subheader("Pada jam berapa yang paling banyak dan paling sedikit disewa?")
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(20, 10))  # Ukuran lebih kecil dari sebelumnya
-
-sns.barplot(x="hours", y="count_cr", data=sum_order_items_df.head(5), palette=["#D3D3D3", "#D3D3D3", "#90CAF9", "#D3D3D3", "#D3D3D3"], ax=ax[0])
-ax[0].set_ylabel(None)
-ax[0].set_xlabel("Hours (PM)", fontsize=30)
-ax[0].set_title("Jam dengan banyak penyewa sepeda", loc="center", fontsize=30)
-ax[0].tick_params(axis='y', labelsize=35)
-ax[0].tick_params(axis='x', labelsize=30)
-
-sns.barplot(x="hours", y="count_cr", data=sum_order_items_df.sort_values(by="hours", ascending=True).head(5), palette=["#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#90CAF9"], ax=ax[1])
-ax[1].set_ylabel(None)
-ax[1].set_xlabel("Hours (AM)", fontsize=30)
-ax[1].set_title("Jam dengan sedikit penyewa sepeda", loc="center", fontsize=30)
-ax[1].invert_xaxis()
-ax[1].yaxis.set_label_position("right")
-ax[1].yaxis.tick_right()
-ax[1].tick_params(axis='y', labelsize=35)
-ax[1].tick_params(axis='x', labelsize=30)
-
-st.pyplot(fig)
-
-st.subheader("Musim apa yang paling banyak disewa?")
-
-colors = ["#D3D3D3", "#D3D3D3", "#D3D3D3", "#90CAF9"]
-fig, ax = plt.subplots(figsize=(20, 10))
-sns.barplot(
-    y="count_cr",
-    x="season",
-    data=season_df.sort_values(by="season", ascending=False),
-    palette=colors,
-    ax=ax
-)
-ax.set_title("Grafik Antar Musim", loc="center", fontsize=50)
-ax.set_ylabel(None)
-ax.set_xlabel(None)
-ax.tick_params(axis='x', labelsize=35)
-ax.tick_params(axis='y', labelsize=30)
-st.pyplot(fig)
-
-st.subheader("Perbandingan Customer yang Registered dengan Casual")
-
-labels = 'casual', 'registered'
-sizes = [18.8, 81.2]
-explode = (0, 0.1)
-
-fig1, ax1 = plt.subplots()
-ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%', colors=["#D3D3D3", "#90CAF9"],
-        shadow=True, startangle=90)
-ax1.axis('equal')
-
-st.pyplot(fig1)
+    st.pyplot(fig1)
