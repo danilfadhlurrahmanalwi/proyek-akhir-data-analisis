@@ -1,0 +1,7 @@
+Sebelum memasukan link proyekakhir dibawah, pastikan kamu sudah mendownload file folder dashboard
+  1. day_df.csv
+  2. hour_day.csv
+Upload pada proyek akhir di streamlit cloud dibawah
+
+link streamlit cloud
+>> https://proyekakhirdanil.streamlit.app/
