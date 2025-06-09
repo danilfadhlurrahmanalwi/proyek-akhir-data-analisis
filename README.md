@@ -1,5 +1,7 @@
 # 🚲 Bike Sharing
-# Year Accomplished : 2024
+### Year Accomplished : 2024
+### Role/Position : Programmer
+### Project Description
 
 
 
