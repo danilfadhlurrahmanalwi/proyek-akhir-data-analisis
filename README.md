@@ -1,3 +1,15 @@
+# 🚲 Bike Sharing
+# Year Accomplished : 2024
+
+
+
+
+
+
+
+
+
+
 # Membuat virtual environment menggunakan pipenv
 ## Setup Environment - Shell/Terminal
 	
