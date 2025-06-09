@@ -1,6 +1,6 @@
 # 🚲 Bike Sharing
 #### Year Accomplished : 2024
-#### Role/Position : Programmer
+#### Role/Position : Data Analysis/Programmer
 #### Project Description
 This project was a final assignment for the Data Analysis with Python module. In this project, I conducted data analysis using Python to identify the specific days and times when bicycle rentals were most frequent. The results showed that bicycle usage peaked on weekdays, during working hours, and in clear weather conditions. After completing the analysis and obtaining the insights, I deployed the results using Streamlit. The Streamlit application presents a report summarizing the analysis based on hourly and daily data, making it easier to understand the peak, low, and moderate bicycle rental periods.
 
