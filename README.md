@@ -27,4 +27,4 @@ This project was a final assignment for the Data Analysis with Python module. In
 - streamlit run main.py
 
 ## Documentation
-<img src="Dashboard.png" width="500"/>
+<img src="dashboard/Dashborad.png" width="500"/>
