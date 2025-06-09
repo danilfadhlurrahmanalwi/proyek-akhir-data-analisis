@@ -25,3 +25,6 @@ This project was a final assignment for the Data Analysis with Python module. In
 ## Running Streamlit Dashboard
 ### Run the following command in CMD:
 - streamlit run main.py
+
+## Documentation
+<img src
